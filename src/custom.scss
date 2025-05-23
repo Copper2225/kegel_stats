@@ -1,0 +1,82 @@
+$primary: #1ed760;
+$info: #6a18d1;
+$body-color: white;
+$body-bg: #2b2b2b;
+$body-emphasis-color: white;
+$btn-color: #fff;
+
+:root {
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #242424;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        color: #213547;
+        background-color: #ffffff;
+    }
+}
+
+.btn-primary {
+    --bs-btn-color: #fff !important;
+    --bs-btn-hover-color: #fff !important;
+    --bs-btn-active-color: #fff !important;
+}
+
+.btn-outline-primary {
+    --bs-btn-hover-color: #fff !important;
+    --bs-btn-active-color: #fff !important;
+}
+
+.table {
+    --bs-table-hover-bg: rgba(120, 65, 185, 0.15) !important;
+}
+
+.link-spotify {
+    color: rgb(147, 255, 189);
+
+    &:hover {
+        color: var(--bs-primary);
+    }
+}
+
+.link-deezer {
+    color: rgb(161, 183, 255);
+
+    &:hover {
+        color: var(--bs-info);
+    }
+}
+
+.form-control-light {
+    background: var(--bs-light) !important;
+    color: var(--bs-dark) !important;
+
+    &::placeholder {
+        color: var(--bs-dark-grey) !important;
+    }
+
+    &:focus {
+        box-shadow: none !important;
+    }
+}
+
+.form-focus-within {
+    border-radius: 6px;
+
+    &:focus-within {
+        box-shadow: 0 0 0 0.25rem rgba(30, 215, 96, 0.25);
+    }
+}
+
+@import '../node_modules/bootstrap/scss/bootstrap';
