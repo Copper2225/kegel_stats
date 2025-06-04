@@ -1,12 +1,14 @@
-import InputTile from 'src/View/InputPage/InputTile';
+import InputPage from 'src/View/InputPage/InputPage';
+import { Route, Routes } from 'react-router';
+import AdvancedInputPage from 'src/View/InputPage/AdvancedInputPage';
 
 function App() {
     return (
-        <div style={{ height: '100dvh', width: '100dvw' }} className={'justify-content-around d-flex flex-column'}>
-            <InputTile title={'Bahn 1'} />
-            <InputTile title={'Bahn 2'} />
-            <InputTile title={'Bahn 3'} />
-            <InputTile title={'Bahn 4'} />
+        <div style={{ height: '100dvh', width: '100dvw', padding: '8px' }}>
+            <Routes>
+                <Route path="/" element={<InputPage />} />
+                <Route path="/advancedInput" element={<AdvancedInputPage />} />
+            </Routes>
         </div>
     );
 }

@@ -1,9 +1,10 @@
-import { ReactElement, useCallback, useState } from 'react';
+import { ReactElement, useCallback } from 'react';
 import styled from 'styled-components';
 import { Button, FormControl } from 'react-bootstrap';
-import * as React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalculator } from '@fortawesome/free-solid-svg-icons';
+import { FormikHelpers } from 'formik';
+import { AlleysFormData } from 'src/View/InputPage/InputPage';
 
 const ParentWrapper = styled.div`
     display: grid;
@@ -14,48 +15,44 @@ const ParentWrapper = styled.div`
 
 interface Props {
     title: string;
+    namePrefix: string;
+    values: {
+        full: string | number;
+        clear: string | number;
+        total: string | number;
+    };
+    setFieldValue: FormikHelpers<AlleysFormData>['setFieldValue'];
 }
 
-const InputTile = ({ title }: Props): ReactElement => {
-    const [volle, setVolle] = useState<number | ''>('');
-    const [raeumen, setRaeumen] = useState<number | ''>('');
-    const [gesamt, setGesamt] = useState<number | ''>('');
-    const [isTotalMismatch, setIsTotalMismatch] = useState(false);
-
+const InputTile = ({ title, namePrefix, values, setFieldValue }: Props): ReactElement => {
     const handleCalculation = useCallback(() => {
-        const calculateMissingValue = (volleValue: number, raeumenValue: number, gesamtValue: number) => {
-            if (volleValue === 0) {
-                return gesamtValue - raeumenValue;
+        const calculateMissingValue = (fullValue: number, clearValue: number, totalValue: number) => {
+            if (fullValue === 0) {
+                return totalValue - clearValue;
             }
-            if (raeumenValue === 0) {
-                return gesamtValue - volleValue;
+            if (clearValue === 0) {
+                return totalValue - fullValue;
             }
-            return volleValue + raeumenValue;
+            return fullValue + clearValue;
         };
-        if (volle !== '' && gesamt !== '' && raeumen !== '') {
-            setIsTotalMismatch(volle + raeumen !== gesamt);
+
+        const full = Number(values.full) || 0;
+        const clear = Number(values.clear) || 0;
+        const total = Number(values.total) || 0;
+
+        if (full && total && clear) {
             return;
-        } else if (volle !== '' && gesamt !== '') {
-            setRaeumen(calculateMissingValue(volle, 0, gesamt));
-        } else if (volle !== '' && raeumen !== '') {
-            setGesamt(calculateMissingValue(volle, raeumen, 0));
-        } else if (gesamt !== '' && raeumen !== '') {
-            setVolle(calculateMissingValue(0, raeumen, gesamt));
+        } else if (full && total) {
+            setFieldValue(`${namePrefix}.clear`, calculateMissingValue(full, 0, total)).then();
+        } else if (full && clear) {
+            setFieldValue(`${namePrefix}.total`, calculateMissingValue(full, clear, 0)).then();
+        } else if (total && clear) {
+            setFieldValue(`${namePrefix}.full`, calculateMissingValue(0, clear, total)).then();
         }
-        setIsTotalMismatch(false);
-    }, [gesamt, raeumen, volle, setIsTotalMismatch]);
+    }, [values, namePrefix, setFieldValue]);
 
-    const handleVolleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setVolle(parseInt(e.target.value) || '');
-    }, []);
-
-    const handleRaeumenChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setRaeumen(parseInt(e.target.value) || '');
-    }, []);
-
-    const handleGesamtChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        setGesamt(parseInt(e.target.value) || '');
-    }, []);
+    const isTotalMismatch =
+        values.full && values.clear && values.total && Number(values.full) + Number(values.clear) !== Number(values.total);
 
     return (
         <div className={'mx-2'}>
@@ -69,19 +66,32 @@ const InputTile = ({ title }: Props): ReactElement => {
             </h1>
             <ParentWrapper>
                 <div style={{ gridArea: 'a' }}>
-                    <FormControl value={volle} onChange={handleVolleChange} type="number" placeholder="Volle" />
+                    <FormControl
+                        name={`${namePrefix}.full`}
+                        value={values.full}
+                        onChange={(e) => setFieldValue(`${namePrefix}.full`, e.target.value ? Number(e.target.value) : '')}
+                        type="number"
+                        placeholder="Volle"
+                    />
                 </div>
                 <div style={{ gridArea: 'c' }}>
                     <FormControl
-                        value={gesamt}
-                        onChange={handleGesamtChange}
+                        name={`${namePrefix}.total`}
+                        value={values.total}
+                        onChange={(e) => setFieldValue(`${namePrefix}.total`, e.target.value ? Number(e.target.value) : '')}
                         type="number"
-                        className={`h-100 ${isTotalMismatch ? 'border-danger text-danger' : ''}`}
+                        className={`h-100 ${isTotalMismatch ? 'border-danger text-danger' : ''} text-center fs-2`}
                         placeholder="Gesamt"
                     />
                 </div>
                 <div style={{ gridArea: 'b' }}>
-                    <FormControl value={raeumen} onChange={handleRaeumenChange} type="number" placeholder="Räumen" />
+                    <FormControl
+                        name={`${namePrefix}.clear`}
+                        value={values.clear}
+                        onChange={(e) => setFieldValue(`${namePrefix}.clear`, e.target.value ? Number(e.target.value) : '')}
+                        type="number"
+                        placeholder="Räumen"
+                    />
                 </div>
             </ParentWrapper>
         </div>
