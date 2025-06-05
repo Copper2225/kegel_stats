@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router';
 import AdvancedInputPage from 'src/View/InputPage/AdvancedInputPage';
 import InputPage from 'src/View/InputPage/InputPage';
+import RecordsPage from 'src/View/RecordsPage/RecordsPage';
 
 function App() {
     return (
@@ -8,6 +9,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<InputPage />} />
                 <Route path="/advancedInput" element={<AdvancedInputPage />} />
+                <Route path="/records" element={<RecordsPage />} />
             </Routes>
         </div>
     );

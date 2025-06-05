@@ -1,12 +1,13 @@
 import { ReactElement, useCallback, useEffect } from 'react';
 import InputTile from 'src/View/InputPage/InputTile';
 import { Button, FormControl } from 'react-bootstrap';
-import { AlleyData, useAlleyStore } from 'src/stores/alleyStore';
+import { useAlleyStore } from 'src/stores/alleyStore';
 import { Form as FormikForm, Formik, useFormikContext } from 'formik';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalculator } from '@fortawesome/free-solid-svg-icons';
+import { Alley, AlleyConfig } from 'src/types/alleyConfig';
 
 const validationSchema = Yup.object().shape({
     alley1: Yup.object().shape({
@@ -42,7 +43,7 @@ export interface AlleysFormData {
     alley2: AlleyFormData;
     alley3: AlleyFormData;
     alley4: AlleyFormData;
-    total: number | string;
+    total: number | '';
 }
 
 const initialValues: AlleysFormData = {
@@ -54,33 +55,53 @@ const initialValues: AlleysFormData = {
 };
 
 const InputPage = (): ReactElement => {
-    const { setAlleys, clearAlleys } = useAlleyStore();
+    const { setAlleys, setTotal, clearAlleys } = useAlleyStore();
     const navigate = useNavigate();
+    const formik = useFormikContext<typeof initialValues>();
+
+    const calculateTotal = useCallback(() => {
+        let total = 0;
+
+        ['1', '2', '3', '4'].forEach((alley) => {
+            const alleyData = formik.values[`alley${alley}` as keyof typeof formik.values] as AlleyFormData;
+            if (alleyData.total === '') {
+                return;
+            }
+
+            total = total + (alleyData.total === '' ? 0 : Number(alleyData.total));
+        });
+
+        return total;
+    }, [formik]);
 
     useEffect(() => {
         clearAlleys();
     }, [clearAlleys]);
 
+    const getAlleyFromFormData = useCallback((value: AlleyFormData): Alley => {
+        return {
+            total: String(value.total).trim() !== '' ? (value.total as number) : null,
+            full: String(value.full).trim() !== '' ? (value.full as number) : null,
+            clearing: String(value.clear).trim() !== '' ? (value.clear as number) : null,
+        };
+    }, []);
+
     const handleSubmit = useCallback(
         (values: typeof initialValues) => {
-            const data: AlleyData[] = [];
+            const data: AlleyConfig = {
+                start: 1,
+                alley1: getAlleyFromFormData(values.alley1),
+                alley2: getAlleyFromFormData(values.alley2),
+                alley3: getAlleyFromFormData(values.alley3),
+                alley4: getAlleyFromFormData(values.alley4),
+            };
 
-            ['1', '2', '3', '4'].forEach((alley) => {
-                const alleyData = values[`alley${alley}` as keyof typeof values] as AlleyFormData;
-                if (alleyData.total === '') {
-                    return;
-                }
-                data.push({
-                    full: alleyData.full === '' ? null : Number(alleyData.full),
-                    clearing: alleyData.clear === '' ? null : Number(alleyData.clear),
-                    total: alleyData.total === '' ? null : Number(alleyData.total),
-                });
-            });
+            setTotal(values.total !== '' ? (values.total as number) : calculateTotal());
 
             setAlleys(data);
             navigate('/advancedInput');
         },
-        [navigate, setAlleys],
+        [calculateTotal, getAlleyFromFormData, navigate, setAlleys, setTotal],
     );
 
     return (

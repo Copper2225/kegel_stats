@@ -1,0 +1,31 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "Backend for kegel_stats",
+    "main": "server.ts",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/server.js",
+        "backend:dev": "tsx watch server.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Copper2225/kegel_stats.git"
+    },
+    "private": true,
+    "dependencies": {
+        "@types/better-sqlite3": "^7.6.13",
+        "better-sqlite3": "^11.10.0",
+        "cors": "^2.8.5",
+        "express": "^5.1.0",
+        "prettier": "^3.5.3"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.18",
+        "eslint": "^9.28.0",
+        "ts-node-dev": "^2.0.0",
+        "tsx": "^4.19.4",
+        "typescript": "^5.8.3",
+        "typescript-eslint": "^8.33.1"
+    }
+}
