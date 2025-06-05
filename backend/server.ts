@@ -30,8 +30,6 @@ process.on('SIGINT', () => {
     });
 });
 
-console.log(dH.getAllRecords());
-
 app.post('/saveRecord', (req, res) => {
     const { alleys, total, location, date, training } = req.body;
     try {

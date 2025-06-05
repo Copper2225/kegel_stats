@@ -4,7 +4,7 @@
     "description": "Backend for kegel_stats",
     "main": "server.ts",
     "scripts": {
-        "build": "tsc",
+        "build": "tsc && tsc-alias",
         "start": "node dist/server.js",
         "backend:dev": "tsx watch server.ts"
     },
@@ -25,6 +25,7 @@
         "@types/express": "^5.0.2",
         "eslint": "^9.28.0",
         "ts-node-dev": "^2.0.0",
+        "tsc-alias": "^1.8.16",
         "tsx": "^4.19.4",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.33.1"
