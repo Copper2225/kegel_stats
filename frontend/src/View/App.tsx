@@ -1,6 +1,6 @@
-import InputPage from 'src/View/InputPage/InputPage';
 import { Route, Routes } from 'react-router';
 import AdvancedInputPage from 'src/View/InputPage/AdvancedInputPage';
+import InputPage from 'src/View/InputPage/InputPage';
 
 function App() {
     return (
