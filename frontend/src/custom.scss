@@ -1,4 +1,4 @@
-$primary: #1ed760;
+$primary: #00d176;
 $info: #6a18d1;
 $body-color: white;
 $body-bg: #2b2b2b;
@@ -31,6 +31,10 @@ $btn-color: #fff;
     --bs-btn-color: #fff !important;
     --bs-btn-hover-color: #fff !important;
     --bs-btn-active-color: #fff !important;
+}
+
+.btn-close {
+    @extend .btn-close-white;
 }
 
 .btn-outline-primary {

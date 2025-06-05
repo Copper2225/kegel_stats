@@ -11,7 +11,7 @@ app.use(cors());
 
 const server = app.listen(3002, () => {
     console.log('Server started on port 3002!');
-    // dH.createTable();
+    dH.createTable();
 });
 
 process.on('SIGTERM', () => {

@@ -3,6 +3,7 @@ import { Button, FormCheck, FormControl, FormGroup, FormLabel, FormSelect } from
 import { Form, Formik } from 'formik';
 import { useAlleyStore } from 'src/stores/alleyStore';
 import { saveRecord } from 'src/requests/saveRequests';
+import { useNavigate } from 'react-router';
 
 interface AdvancedInputFormData {
     start: number;
@@ -20,6 +21,7 @@ const initialValues: AdvancedInputFormData = {
 
 const AdvancedInputPage = (): ReactElement => {
     const { alleys, total } = useAlleyStore();
+    const navigate = useNavigate();
 
     const handleSubmit = useCallback(
         async (values: AdvancedInputFormData) => {
@@ -32,9 +34,11 @@ const AdvancedInputPage = (): ReactElement => {
                 training: values.training,
             });
 
-            console.log(response);
+            if (response.success === true) {
+                navigate('/records');
+            }
         },
-        [alleys, total],
+        [alleys, navigate, total],
     );
 
     return (
