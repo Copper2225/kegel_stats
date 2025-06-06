@@ -30,7 +30,7 @@ const RecordsPage = () => {
 
     return (
         <div className={'h-100'}>
-            <div className={'d-flex align-items-center'}>
+            <div className={'d-flex align-items-center mb-2'}>
                 <a href={'/'} className={'btn btn-primary'}>
                     <FontAwesomeIcon icon={faChevronLeft} />
                 </a>
