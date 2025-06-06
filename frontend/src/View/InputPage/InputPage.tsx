@@ -148,7 +148,9 @@ const FormContent = () => {
             <InputTile title={'Bahn 2'} namePrefix="alley2" values={formik.values.alley2} setFieldValue={formik.setFieldValue} />
             <InputTile title={'Bahn 3'} namePrefix="alley3" values={formik.values.alley3} setFieldValue={formik.setFieldValue} />
             <InputTile title={'Bahn 4'} namePrefix="alley4" values={formik.values.alley4} setFieldValue={formik.setFieldValue} />
-            <Button type="submit">Save</Button>
+            <Button type="submit" className={'mb-2'} size={'lg'}>
+                Save
+            </Button>
         </FormikForm>
     );
 };

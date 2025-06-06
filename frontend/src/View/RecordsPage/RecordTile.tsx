@@ -32,9 +32,10 @@ const GridButton = styled(Button)`
 interface Props {
     key: number;
     record: StatsRecord;
+    loadRecords: () => void;
 }
 
-const RecordTile = ({ record, key }: Props): React.ReactElement => {
+const RecordTile = ({ record, key, loadRecords }: Props): React.ReactElement => {
     const [showModal, setShowModal] = React.useState<boolean>(false);
 
     const openModal = useCallback(() => {
@@ -58,7 +59,7 @@ const RecordTile = ({ record, key }: Props): React.ReactElement => {
                     {record.total}
                 </div>
             </GridButton>
-            <RecordDetailsModal showModal={showModal} hideModal={hideModal} record={record} />
+            <RecordDetailsModal showModal={showModal} hideModal={hideModal} record={record} loadRecords={loadRecords} />
         </ParentWrapper>
     );
 };

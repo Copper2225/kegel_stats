@@ -56,3 +56,14 @@ app.get('/allRecords', (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to load records' });
     }
 });
+
+app.post('/deleteRecord', (req, res) => {
+    const { id } = req.body;
+    try {
+        const success = dH.deleteRecord(id);
+        res.json({ success });
+    } catch (error) {
+        console.error('Error deleting record:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete record' });
+    }
+});

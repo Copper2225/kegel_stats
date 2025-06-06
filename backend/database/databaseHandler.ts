@@ -90,4 +90,19 @@ export class DatabaseHandler {
             throw error;
         }
     }
+
+    deleteRecord(id: number): boolean {
+        const query = `
+            DELETE FROM KegelRecords
+            WHERE id = @id
+        `;
+
+        try {
+            const result = this.db.prepare(query).run({ id });
+            return result.changes > 0;
+        } catch (error) {
+            console.error('Error deleting record:', error);
+            throw error;
+        }
+    }
 }
