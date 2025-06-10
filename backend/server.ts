@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { DatabaseHandler } from 'database/databaseHandler';
+import { alleysColumns, DatabaseHandler, mainColumns } from 'database/databaseHandler';
 
 const app = express();
 
@@ -11,7 +11,8 @@ app.use(cors());
 
 const server = app.listen(3002, () => {
     console.log('Server started on port 3002!');
-    dH.createTable();
+    dH.createTable(mainColumns, 'KegelRecords');
+    dH.createTable(alleysColumns, 'Alleys');
 });
 
 process.on('SIGTERM', () => {
@@ -31,14 +32,20 @@ process.on('SIGINT', () => {
 });
 
 app.post('/saveRecord', (req, res) => {
-    const { alleys, total, location, date, training } = req.body;
+    const { alleys, total, location, date, training, start } = req.body;
     try {
         const recordId = dH.saveRecord({
             total,
-            alleys,
+            alleys: alleys.map((alley: any) => ({
+                number: alley.number,
+                full: alley.full,
+                total: alley.total,
+                clear: alley.clear,
+            })),
             location,
             date,
             training,
+            start,
         });
         res.json({ success: true, recordId });
     } catch (error) {

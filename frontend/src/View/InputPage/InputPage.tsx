@@ -7,7 +7,7 @@ import * as Yup from 'yup';
 import { useNavigate } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalculator } from '@fortawesome/free-solid-svg-icons';
-import { Alley, AlleyConfig } from 'src/types/alleyConfig';
+import { Alley } from 'src/types/alleyConfig';
 
 const validationSchema = Yup.object().shape({
     alley1: Yup.object().shape({
@@ -36,6 +36,7 @@ interface AlleyFormData {
     full: number | string;
     clear: number | string;
     total: number | string;
+    number: number;
 }
 
 export interface AlleysFormData {
@@ -47,10 +48,10 @@ export interface AlleysFormData {
 }
 
 const initialValues: AlleysFormData = {
-    alley1: { full: '', clear: '', total: '' },
-    alley2: { full: '', clear: '', total: '' },
-    alley3: { full: '', clear: '', total: '' },
-    alley4: { full: '', clear: '', total: '' },
+    alley1: { full: '', clear: '', total: '', number: 1 },
+    alley2: { full: '', clear: '', total: '', number: 2 },
+    alley3: { full: '', clear: '', total: '', number: 3 },
+    alley4: { full: '', clear: '', total: '', number: 4 },
     total: '',
 };
 
@@ -82,19 +83,19 @@ const InputPage = (): ReactElement => {
         return {
             total: String(value.total).trim() !== '' ? (value.total as number) : null,
             full: String(value.full).trim() !== '' ? (value.full as number) : null,
-            clearing: String(value.clear).trim() !== '' ? (value.clear as number) : null,
+            clear: String(value.clear).trim() !== '' ? (value.clear as number) : null,
+            number: value.number as number,
         };
     }, []);
 
     const handleSubmit = useCallback(
         (values: typeof initialValues) => {
-            const data: AlleyConfig = {
-                start: 1,
-                alley1: getAlleyFromFormData(values.alley1),
-                alley2: getAlleyFromFormData(values.alley2),
-                alley3: getAlleyFromFormData(values.alley3),
-                alley4: getAlleyFromFormData(values.alley4),
-            };
+            const data: Alley[] = [
+                getAlleyFromFormData(values.alley1),
+                getAlleyFromFormData(values.alley2),
+                getAlleyFromFormData(values.alley3),
+                getAlleyFromFormData(values.alley4),
+            ];
 
             setTotal(values.total !== '' ? (values.total as number) : calculateTotal());
 

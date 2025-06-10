@@ -1,15 +1,15 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { persist } from 'zustand/middleware';
-import { AlleyConfig } from 'src/types/alleyConfig';
+import { Alley } from 'src/types/alleyConfig';
 
 interface TrackingData {
-    alleys: AlleyConfig;
+    alleys: Alley[];
     total: number;
 }
 
 interface Actions {
-    setAlleys(alleys: AlleyConfig): void;
+    setAlleys(alleys: Alley[]): void;
     setTotal(total: number): void;
     clearAlleys(): void;
 }
@@ -17,15 +17,9 @@ interface Actions {
 export const useAlleyStore = create<TrackingData & Actions>()(
     persist(
         immer((set) => ({
-            alleys: {
-                start: 1,
-                alley1: { total: null, full: null, clearing: null },
-                alley2: { total: null, full: null, clearing: null },
-                alley3: { total: null, full: null, clearing: null },
-                alley4: { total: null, full: null, clearing: null },
-            },
+            alleys: [],
             total: 0,
-            setAlleys: (alleys: AlleyConfig) =>
+            setAlleys: (alleys: Alley[]) =>
                 set((state) => {
                     state.alleys = alleys;
                 }),
@@ -35,13 +29,7 @@ export const useAlleyStore = create<TrackingData & Actions>()(
                 }),
             clearAlleys: () =>
                 set((state) => {
-                    state.alleys = {
-                        start: 1,
-                        alley1: { total: null, full: null, clearing: null },
-                        alley2: { total: null, full: null, clearing: null },
-                        alley3: { total: null, full: null, clearing: null },
-                        alley4: { total: null, full: null, clearing: null },
-                    };
+                    state.alleys = [];
                 }),
         })),
         {

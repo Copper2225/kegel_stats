@@ -6,6 +6,25 @@ export interface ColumnDefinition {
     constraints?: string[];
 }
 
+export const mainColumns: ColumnDefinition[] = [
+    { name: 'id', type: 'INTEGER', constraints: ['PRIMARY KEY', 'AUTOINCREMENT'] },
+    { name: 'total', type: 'INTEGER', constraints: ['NOT NULL'] },
+    { name: 'location', type: 'TEXT', constraints: ['NOT NULL'] },
+    { name: 'date', type: 'TEXT', constraints: ['NOT NULL'] },
+    { name: 'training', type: 'BOOLEAN', constraints: ['NOT NULL'] },
+    { name: 'start', type: 'INTEGER', constraints: ['NOT NULL'] },
+    { name: 'created_at', type: 'TEXT', constraints: ['NOT NULL', 'DEFAULT CURRENT_TIMESTAMP'] },
+];
+
+export const alleysColumns: ColumnDefinition[] = [
+    { name: 'id', type: 'INTEGER', constraints: ['PRIMARY KEY', 'AUTOINCREMENT'] },
+    { name: 'record_id', type: 'INTEGER', constraints: ['NOT NULL', 'REFERENCES KegelRecords(id) ON DELETE CASCADE'] },
+    { name: 'number', type: 'INTEGER', constraints: ['NOT NULL'] },
+    { name: 'full', type: 'INTEGER' },
+    { name: 'total', type: 'INTEGER' },
+    { name: 'clear', type: 'INTEGER' },
+];
+
 export class DatabaseHandler {
     private db: Database.Database;
 
@@ -14,17 +33,7 @@ export class DatabaseHandler {
         this.db.pragma('foreign_keys = ON');
     }
 
-    createTable(): void {
-        const columns: ColumnDefinition[] = [
-            { name: 'id', type: 'INTEGER', constraints: ['PRIMARY KEY', 'AUTOINCREMENT'] },
-            { name: 'total', type: 'INTEGER', constraints: ['NOT NULL'] },
-            { name: 'alleys', type: 'TEXT' },
-            { name: 'location', type: 'TEXT', constraints: ['NOT NULL'] },
-            { name: 'date', type: 'TEXT', constraints: ['NOT NULL'] },
-            { name: 'training', type: 'BOOLEAN', constraints: ['NOT NULL'] },
-            { name: 'created_at', type: 'TEXT', constraints: ['NOT NULL', 'DEFAULT CURRENT_TIMESTAMP'] },
-        ];
-
+    createTable(columns: ColumnDefinition[], title: string): void {
         const columnDefinitions = columns
             .map((column) => {
                 const constraints = column.constraints ? ` ${column.constraints.join(' ')}` : '';
@@ -32,13 +41,13 @@ export class DatabaseHandler {
             })
             .join(', ');
 
-        const query = `CREATE TABLE IF NOT EXISTS "KegelRecords" (${columnDefinitions})`;
+        const query = `CREATE TABLE IF NOT EXISTS "${title}" (${columnDefinitions})`;
 
         try {
             this.db.prepare(query).run();
-            console.log(`Table "KegelRecords" successfully initialized`);
+            console.log(`Table "${title}" successfully initialized`);
         } catch (error) {
-            console.error(`Error creating table "KegelRecords":`, error);
+            console.error(`Error creating table "${title}":`, error);
             throw error;
         }
     }
@@ -47,42 +56,99 @@ export class DatabaseHandler {
         this.db.close();
     }
 
-    saveRecord(record: { total: number; alleys: any; location: string; date: string; training: boolean }): number {
+    saveRecord(record: {
+        total: number;
+        alleys: Array<{ number: number; full: number; total: number; clear: number }>;
+        location: string;
+        date: string;
+        training: boolean;
+        start: number;
+    }): number {
         const query = `
-            INSERT INTO KegelRecords (total, alleys, location, date, training)
-            VALUES (@total, @alleys, @location, @date, @training)
+            INSERT INTO KegelRecords (total, location, date, training, start)
+            VALUES (@total, @location, @date, @training, @start)
         `;
 
         try {
             const result = this.db.prepare(query).run({
                 total: record.total,
-                alleys: JSON.stringify(record.alleys),
                 location: record.location,
                 date: record.date,
                 training: record.training ? 1 : 0,
+                start: record.start,
             });
-            return result.lastInsertRowid as number;
+
+            const recordId = result.lastInsertRowid as number;
+
+            // Save each alley from the array
+            record.alleys.forEach((alley) => {
+                this.saveAlley(recordId, alley);
+            });
+
+            return recordId;
         } catch (error) {
             console.error('Error saving record:', error);
             throw error;
         }
     }
 
+    saveAlley(recordId: number, alley: { number: number; full: number; total: number; clear: number }): number {
+        const query = `
+            INSERT INTO Alleys (record_id, number, full, total, clear)
+            VALUES (@record_id, @number, @full, @total, @clear)
+        `;
+
+        try {
+            const result = this.db.prepare(query).run({
+                record_id: recordId,
+                number: alley.number,
+                full: alley.full,
+                total: alley.total,
+                clear: alley.clear,
+            });
+            return result.lastInsertRowid as number;
+        } catch (error) {
+            console.error('Error saving alley:', error);
+            throw error;
+        }
+    }
+
     getAllRecords(): any[] {
         const query = `
-            SELECT * FROM KegelRecords
+            SELECT r.*, 
+                   GROUP_CONCAT(json_object(
+                       'number', a.number,
+                       'full', a.full,
+                       'total', a.total,
+                       'clear', a.clear
+                   ) ORDER BY a.number) as alley_details
+            FROM KegelRecords r
+            LEFT JOIN Alleys a ON r.id = a.record_id
+            GROUP BY r.id
+            ORDER BY r.date DESC 
         `;
 
         try {
             const result = this.db.prepare(query).all();
             return result.map((record: any) => {
+                const alleyDetails = record.alley_details ? JSON.parse(`[${record.alley_details}]`) : [];
+                const alleys = alleyDetails.reduce((acc: any, alley: any) => {
+                    acc[`alley${alley.number}`] = {
+                        full: alley.full,
+                        total: alley.total,
+                        clear: alley.clear,
+                    };
+                    return acc;
+                }, {});
+
                 return {
                     id: record.id,
                     total: record.total,
-                    alleys: JSON.parse(record.alleys),
+                    alleys,
                     location: record.location,
                     date: record.date,
                     training: record.training,
+                    start: record.start,
                 };
             });
         } catch (error) {

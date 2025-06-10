@@ -26,7 +26,7 @@ const RecordDetailsModalAlley = ({ alley, title }: Props) => {
             <h4>{title}</h4>
             <Grid>
                 <GridItem style={{ gridArea: 'a' }}>{alley.full ?? '-'}</GridItem>
-                <GridItem style={{ gridArea: 'b' }}>{alley.clearing ?? '-'}</GridItem>
+                <GridItem style={{ gridArea: 'b' }}>{alley.clear ?? '-'}</GridItem>
                 <GridItem className={'text-end align-content-center'} style={{ gridArea: 'c', fontSize: '2.5em' }}>
                     {alley.total ?? '-'}
                 </GridItem>

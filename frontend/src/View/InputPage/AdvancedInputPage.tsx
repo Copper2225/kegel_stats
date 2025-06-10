@@ -27,7 +27,8 @@ const AdvancedInputPage = (): ReactElement => {
         async (values: AdvancedInputFormData) => {
             const response = await saveRecord({
                 id: 0,
-                alleys: { ...alleys, start: values.start },
+                alleys: alleys,
+                start: values.start,
                 total: total,
                 location: values.location,
                 date: values.date,
