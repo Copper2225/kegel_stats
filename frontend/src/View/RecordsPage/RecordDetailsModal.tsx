@@ -24,6 +24,7 @@ const RecordDetailsModal = ({ showModal, hideModal, record, loadRecords }: Props
             }
         }
     }, [loadRecords, record.id]);
+
     return (
         <Modal show={showModal} onHide={hideModal} fullscreen>
             <ModalHeader closeButton>Details</ModalHeader>
