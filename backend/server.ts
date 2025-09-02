@@ -64,6 +64,44 @@ app.get('/allRecords', (req, res) => {
     }
 });
 
+app.post('/searchRecords', (req, res) => {
+    try {
+        const {
+            dateFrom = null,
+            dateTo = null,
+            location = null,
+            trainingMode = 'any',
+            startLane = null,
+            lanes = [1, 2, 3, 4],
+            volleMin = null,
+            volleMax = null,
+            clearMin = null,
+            clearMax = null,
+            totalMin = null,
+            totalMax = null,
+        } = req.body || {};
+
+        const records = dH.getFilteredRecords({
+            dateFrom,
+            dateTo,
+            location,
+            trainingMode,
+            startLane,
+            lanes,
+            volleMin,
+            volleMax,
+            clearMin,
+            clearMax,
+            totalMin,
+            totalMax,
+        });
+        res.json({ success: true, records });
+    } catch (error) {
+        console.error('Error searching records:', error);
+        res.status(500).json({ success: false, error: 'Failed to search records' });
+    }
+});
+
 app.post('/deleteRecord', (req, res) => {
     const { id } = req.body;
     try {

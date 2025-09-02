@@ -144,7 +144,7 @@ export class DatabaseHandler {
                 return {
                     id: record.id,
                     total: record.total,
-                    alleys,
+                    alleys: { start: record.start, ...alleys },
                     location: record.location,
                     date: record.date,
                     training: record.training,
@@ -153,6 +153,141 @@ export class DatabaseHandler {
             });
         } catch (error) {
             console.error('Error fetching records:', error);
+            throw error;
+        }
+    }
+
+    getFilteredRecords(filters: {
+        dateFrom?: string | null;
+        dateTo?: string | null;
+        location?: string | null;
+        trainingMode?: 'any' | 'training' | 'wettkampf';
+        startLane?: number | null;
+        lanes?: number[] | null;
+        volleMin?: number | null;
+        volleMax?: number | null;
+        clearMin?: number | null;
+        clearMax?: number | null;
+        totalMin?: number | null;
+        totalMax?: number | null;
+    }): any[] {
+        const {
+            dateFrom,
+            dateTo,
+            location,
+            trainingMode = 'any',
+            startLane = null,
+            lanes = [1, 2, 3, 4],
+            volleMin = null,
+            volleMax = null,
+            clearMin = null,
+            clearMax = null,
+            totalMin = null,
+            totalMax = null,
+        } = filters || {};
+
+        const whereClauses: string[] = [];
+        const havingClauses: string[] = [];
+        const params: Record<string, unknown> = {};
+
+        if (dateFrom) {
+            whereClauses.push('r.date >= @dateFrom');
+            params.dateFrom = dateFrom;
+        }
+        if (dateTo) {
+            whereClauses.push('r.date <= @dateTo');
+            params.dateTo = dateTo;
+        }
+        if (location && location.trim().length > 0) {
+            whereClauses.push('LOWER(r.location) LIKE LOWER(@location)');
+            params.location = `%${location}%`;
+        }
+        if (trainingMode !== 'any') {
+            whereClauses.push('r.training = @training');
+            params.training = trainingMode === 'training' ? 1 : 0;
+        }
+        if (typeof startLane === 'number') {
+            whereClauses.push('r.start = @startLane');
+            params.startLane = startLane;
+        }
+        if (typeof totalMin === 'number') {
+            whereClauses.push('r.total >= @totalMin');
+            params.totalMin = totalMin;
+        }
+        if (typeof totalMax === 'number') {
+            whereClauses.push('r.total <= @totalMax');
+            params.totalMax = totalMax;
+        }
+
+        const laneList = (lanes && lanes.length > 0 ? lanes : [1, 2, 3, 4]).map((n) => Math.max(1, Math.min(4, Number(n))));
+        const lanePlaceholders = laneList.map((_, i) => `@lane${i}`).join(', ');
+        laneList.forEach((lane, i) => {
+            params[`lane${i}`] = lane;
+        });
+
+        if (typeof volleMin === 'number') {
+            havingClauses.push('SUM(CASE WHEN a.number IN (' + lanePlaceholders + ') THEN IFNULL(a.full, 0) ELSE 0 END) >= @volleMin');
+            params.volleMin = volleMin;
+        }
+        if (typeof volleMax === 'number') {
+            havingClauses.push('SUM(CASE WHEN a.number IN (' + lanePlaceholders + ') THEN IFNULL(a.full, 0) ELSE 0 END) <= @volleMax');
+            params.volleMax = volleMax;
+        }
+        if (typeof clearMin === 'number') {
+            havingClauses.push('SUM(CASE WHEN a.number IN (' + lanePlaceholders + ') THEN IFNULL(a.clear, 0) ELSE 0 END) >= @clearMin');
+            params.clearMin = clearMin;
+        }
+        if (typeof clearMax === 'number') {
+            havingClauses.push('SUM(CASE WHEN a.number IN (' + lanePlaceholders + ') THEN IFNULL(a.clear, 0) ELSE 0 END) <= @clearMax');
+            params.clearMax = clearMax;
+        }
+
+        const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
+        const havingSQL = havingClauses.length ? `HAVING ${havingClauses.join(' AND ')}` : '';
+
+        const query = `
+            SELECT r.*, 
+                   GROUP_CONCAT(json_object(
+                       'number', a.number,
+                       'full', a.full,
+                       'total', a.total,
+                       'clear', a.clear
+                   ) ORDER BY a.number) as alley_details,
+                   SUM(CASE WHEN a.number IN (${lanePlaceholders}) THEN IFNULL(a.full, 0) ELSE 0 END) as sum_full_selected,
+                   SUM(CASE WHEN a.number IN (${lanePlaceholders}) THEN IFNULL(a.clear, 0) ELSE 0 END) as sum_clear_selected
+            FROM KegelRecords r
+            LEFT JOIN Alleys a ON r.id = a.record_id
+            ${whereSQL}
+            GROUP BY r.id
+            ${havingSQL}
+            ORDER BY r.date DESC
+        `;
+
+        try {
+            const result = this.db.prepare(query).all(params);
+            return result.map((record: any) => {
+                const alleyDetails = record.alley_details ? JSON.parse(`[${record.alley_details}]`) : [];
+                const alleys = alleyDetails.reduce((acc: any, alley: any) => {
+                    acc[`alley${alley.number}`] = {
+                        full: alley.full,
+                        total: alley.total,
+                        clear: alley.clear,
+                    };
+                    return acc;
+                }, {});
+
+                return {
+                    id: record.id,
+                    total: record.total,
+                    alleys: { start: record.start, ...alleys },
+                    location: record.location,
+                    date: record.date,
+                    training: record.training,
+                    start: record.start,
+                };
+            });
+        } catch (error) {
+            console.error('Error fetching filtered records:', error);
             throw error;
         }
     }

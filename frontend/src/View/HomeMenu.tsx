@@ -17,7 +17,7 @@ const HomeMenu = () => {
             <LinkButton href={'/records'} className={'btn btn-primary'}>
                 Liste
             </LinkButton>
-            <LinkButton href={'/records'} className={'btn btn-primary'}>
+            <LinkButton href={'/stats'} className={'btn btn-primary'}>
                 Statistiken
             </LinkButton>
             <LinkButton href={'/records'} className={'btn btn-primary'}>
