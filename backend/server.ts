@@ -73,12 +73,6 @@ app.post('/searchRecords', (req, res) => {
             trainingMode = 'any',
             startLane = null,
             lanes = [1, 2, 3, 4],
-            volleMin = null,
-            volleMax = null,
-            clearMin = null,
-            clearMax = null,
-            totalMin = null,
-            totalMax = null,
         } = req.body || {};
 
         const records = dH.getFilteredRecords({
@@ -88,12 +82,6 @@ app.post('/searchRecords', (req, res) => {
             trainingMode,
             startLane,
             lanes,
-            volleMin,
-            volleMax,
-            clearMin,
-            clearMax,
-            totalMin,
-            totalMax,
         });
         res.json({ success: true, records });
     } catch (error) {

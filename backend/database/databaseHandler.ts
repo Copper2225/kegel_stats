@@ -164,12 +164,6 @@ export class DatabaseHandler {
         trainingMode?: 'any' | 'training' | 'wettkampf';
         startLane?: number | null;
         lanes?: number[] | null;
-        volleMin?: number | null;
-        volleMax?: number | null;
-        clearMin?: number | null;
-        clearMax?: number | null;
-        totalMin?: number | null;
-        totalMax?: number | null;
     }): any[] {
         const {
             dateFrom,
@@ -178,12 +172,6 @@ export class DatabaseHandler {
             trainingMode = 'any',
             startLane = null,
             lanes = [1, 2, 3, 4],
-            volleMin = null,
-            volleMax = null,
-            clearMin = null,
-            clearMax = null,
-            totalMin = null,
-            totalMax = null,
         } = filters || {};
 
         const whereClauses: string[] = [];
@@ -210,37 +198,7 @@ export class DatabaseHandler {
             whereClauses.push('r.start = @startLane');
             params.startLane = startLane;
         }
-        if (typeof totalMin === 'number') {
-            whereClauses.push('r.total >= @totalMin');
-            params.totalMin = totalMin;
-        }
-        if (typeof totalMax === 'number') {
-            whereClauses.push('r.total <= @totalMax');
-            params.totalMax = totalMax;
-        }
-
-        const laneList = (lanes && lanes.length > 0 ? lanes : [1, 2, 3, 4]).map((n) => Math.max(1, Math.min(4, Number(n))));
-        const lanePlaceholders = laneList.map((_, i) => `@lane${i}`).join(', ');
-        laneList.forEach((lane, i) => {
-            params[`lane${i}`] = lane;
-        });
-
-        if (typeof volleMin === 'number') {
-            havingClauses.push('SUM(CASE WHEN a.number IN (' + lanePlaceholders + ') THEN IFNULL(a.full, 0) ELSE 0 END) >= @volleMin');
-            params.volleMin = volleMin;
-        }
-        if (typeof volleMax === 'number') {
-            havingClauses.push('SUM(CASE WHEN a.number IN (' + lanePlaceholders + ') THEN IFNULL(a.full, 0) ELSE 0 END) <= @volleMax');
-            params.volleMax = volleMax;
-        }
-        if (typeof clearMin === 'number') {
-            havingClauses.push('SUM(CASE WHEN a.number IN (' + lanePlaceholders + ') THEN IFNULL(a.clear, 0) ELSE 0 END) >= @clearMin');
-            params.clearMin = clearMin;
-        }
-        if (typeof clearMax === 'number') {
-            havingClauses.push('SUM(CASE WHEN a.number IN (' + lanePlaceholders + ') THEN IFNULL(a.clear, 0) ELSE 0 END) <= @clearMax');
-            params.clearMax = clearMax;
-        }
+        // removed min/max filters
 
         const whereSQL = whereClauses.length ? `WHERE ${whereClauses.join(' AND ')}` : '';
         const havingSQL = havingClauses.length ? `HAVING ${havingClauses.join(' AND ')}` : '';
@@ -253,8 +211,8 @@ export class DatabaseHandler {
                        'total', a.total,
                        'clear', a.clear
                    ) ORDER BY a.number) as alley_details,
-                   SUM(CASE WHEN a.number IN (${lanePlaceholders}) THEN IFNULL(a.full, 0) ELSE 0 END) as sum_full_selected,
-                   SUM(CASE WHEN a.number IN (${lanePlaceholders}) THEN IFNULL(a.clear, 0) ELSE 0 END) as sum_clear_selected
+                   SUM(IFNULL(a.full, 0)) as sum_full_selected,
+                   SUM(IFNULL(a.clear, 0)) as sum_clear_selected
             FROM KegelRecords r
             LEFT JOIN Alleys a ON r.id = a.record_id
             ${whereSQL}

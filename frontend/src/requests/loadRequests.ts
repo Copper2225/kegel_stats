@@ -18,12 +18,6 @@ export interface SearchFilters {
     trainingMode?: 'any' | 'training' | 'wettkampf';
     startLane?: number | null;
     lanes?: number[];
-    volleMin?: number | '';
-    volleMax?: number | '';
-    clearMin?: number | '';
-    clearMax?: number | '';
-    totalMin?: number | '';
-    totalMax?: number | '';
 }
 
 export const searchRecords = async (filters: SearchFilters): Promise<LoadRequests | null> => {
