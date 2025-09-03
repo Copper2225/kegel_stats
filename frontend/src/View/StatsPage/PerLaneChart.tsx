@@ -17,11 +17,11 @@ const PerLaneChart = ({ records, metric }: PerLaneChartProps) => {
             { label: 'Bahn 1', color: '#ff6b6b', points: [] },
             { label: 'Bahn 2', color: '#6bcBff', points: [] },
             { label: 'Bahn 3', color: '#51cf66', points: [] },
-            { label: 'Bahn 4', color: '#f59f00', points: [] },
+            { label: 'Bahn 4', color: '#b197fc', points: [] },
         ];
         const avg: { label: string; color: string; points: Array<{ x: number; y: number }> } = {
             label: 'Durchschnitt',
-            color: '#b197fc',
+            color: '#ffc107',
             points: [],
         };
 
